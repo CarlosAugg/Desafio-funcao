@@ -9,47 +9,55 @@ namespace FI.AtividadeEntrevista.BLL
 {
     public class BoCliente
     {
-        private static bool IsCpfValid(string cpf)
+        private static bool IsValidCpf(string cpf)
         {
-            if (string.IsNullOrEmpty(cpf))
-                return false;
-
-            cpf = new string(cpf.Where(char.IsDigit).ToArray());
+            cpf = new string(cpf.Where(c => char.IsDigit(c)).ToArray());
 
             if (cpf.Length != 11)
+            {
                 return false;
+            }
 
             if (new string(cpf[0], 11) == cpf)
+            {
                 return false;
+            }
 
-            int[] multiplicador1 = new int[9] { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
-            int[] multiplicador2 = new int[10] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+            var multipliers = new int[] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+            var sum = 0;
 
-            string tempCpf = cpf.Substring(0, 9);
-            int soma = 0;
+            for (var i = 0; i < 9; i++)
+            {
+                sum += int.Parse(cpf[i].ToString()) * multipliers[i];
+            }
 
-            for (int i = 0; i < 9; i++)
-                soma += int.Parse(tempCpf[i].ToString()) * multiplicador1[i];
-
-            int resto = soma % 11;
-            if (resto < 2)
-                resto = 0;
+            var remainder = sum % 11;
+            if (remainder < 2)
+            {
+                remainder = 0;
+            }
             else
-                resto = 11 - resto;
+            {
+                remainder = 11 - remainder;
+            }
 
-            tempCpf = tempCpf + resto;
-            soma = 0;
+            sum = 0;
+            for (var i = 0; i < 10; i++)
+            {
+                sum += int.Parse(cpf[i].ToString()) * multipliers[i];
+            }
 
-            for (int i = 0; i < 10; i++)
-                soma += int.Parse(tempCpf[i].ToString()) * multiplicador2[i];
-
-            resto = soma % 11;
-            if (resto < 2)
-                resto = 0;
+            remainder = sum % 11;
+            if (remainder < 2)
+            {
+                remainder = 0;
+            }
             else
-                resto = 11 - resto;
+            {
+                remainder = 11 - remainder;
+            }
 
-            return cpf.EndsWith(resto.ToString());
+            return cpf[10] == remainder.ToString()[0];
         }
         /// <summary>
         /// Inclui um novo cliente
